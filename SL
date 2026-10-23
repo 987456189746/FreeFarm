@@ -1,6 +1,6 @@
 --[[
-    Silence - Ml Main (Rayfield UI Edition - Final Ultimate Fix)
-    by Henrik @xyzhenrik (Modified by Assistant)
+    Free Farm - Ml Main (Rayfield UI Edition)
+    by NamPing
 ]]
 
 local services = {
@@ -105,8 +105,8 @@ function utils.library:AddWindow(title, config)
     local windowObj = {}
     windowObj.RayfieldWindow = Rayfield:CreateWindow({
         Name = title,
-        LoadingTitle = "Silence Script",
-        LoadingSubtitle = "by Henrik @xyzhenrik",
+        LoadingTitle = "Free Farm Script",
+        LoadingSubtitle = "by NamPing",
         ConfigurationSaving = { Enabled = false },
         KeySystem = false
     })
@@ -197,7 +197,7 @@ function utils.library:AddWindow(title, config)
     return windowObj
 end
 
-utils.silence = utils.library:AddWindow("Silence | Main - " .. utils.greeting(), {})
+utils.silence = utils.library:AddWindow("Free Farm | Main - " .. utils.greeting(), {})
 
 utils.playerData.Player.Idled:Connect(function()
 	pcall(function()
@@ -318,7 +318,7 @@ task.spawn(function()
 	end
 end)
 
-tabs.main.RedactConfigPath = "Silence/MuscleLegendsMainConfig.json"
+tabs.main.RedactConfigPath = "FreeFarm/MuscleLegendsMainConfig.json"
 tabs.main.RedactConfig = { RedactName = false, RedactStats = false }
 
 tabs.main.loadRedactConfig = function()
@@ -336,7 +336,7 @@ end
 tabs.main.saveRedactConfig = function()
 	if type(writefile) ~= "function" then return end
 	pcall(function()
-		if type(makefolder) == "function" and (type(isfolder) ~= "function" or not isfolder("Silence")) then pcall(makefolder, "Silence") end
+		if type(makefolder) == "function" and (type(isfolder) ~= "function" or not isfolder("FreeFarm")) then pcall(makefolder, "FreeFarm") end
 		writefile(tabs.main.RedactConfigPath, services.HttpService:JSONEncode(tabs.main.RedactConfig))
 	end)
 end
@@ -479,6 +479,18 @@ tabs.main.TimeDropdown = tabs.main:AddDropdown("Change Time", function(selection
 end)
 tabs.main.TimeDropdown:Add("Night")
 tabs.main.TimeDropdown:Add("Day")
+
+-- ==========================================
+-- DUMMY VARIABLES FOR BOSS COMPATIBILITY
+-- ==========================================
+tabs.farming.ExerciseData = {SelectedTool = nil, AutoFarm = false, Generation = 0}
+tabs.farming.MachineExerciseData = {
+	Squat = {Running = false, ActiveMachine = nil, SelectedMachine = nil, EnteringMachine = nil},
+	Lift = {Running = false, ActiveMachine = nil, SelectedMachine = nil, EnteringMachine = nil}
+}
+tabs.farming.ToolExerciseSwitch = {Set = function() end}
+tabs.farming.SquatExerciseSwitch = {Set = function() end}
+tabs.farming.LiftExerciseSwitch = {Set = function() end}
 
 -- ==========================================
 -- KILLING TAB
@@ -1249,6 +1261,7 @@ task.spawn(function()
 	end
 end)
 
+
 -- ==========================================
 -- SPECS TAB
 -- ==========================================
@@ -1354,7 +1367,7 @@ task.spawn(function() while true do tabs.specs.updateAdvancedStats(tabs.specs.Da
 -- ==========================================
 tabs.farming:AddLabel("Auto Farm:")
 tabs.farming.AutoFarmRunning = false
-tabs.farming.AutoFarmSwitch = tabs.farming:AddSwitch("Auto Farm (Auto Rep)", function(state)
+tabs.farming.AutoFarmSwitch = tabs.farming:AddSwitch("Auto Farm", function(state)
 	tabs.farming.AutoFarmRunning = state
 	if not state then return end
 	task.spawn(function()
@@ -1483,7 +1496,7 @@ for _, config in ipairs(tabs.farming.Configs) do
 end
 
 -- ==========================================
--- BOSS TAB (Rebuilt from Boss.txt)
+-- BOSS TAB (Rebuilt Logic)
 -- ==========================================
 _G.AutoBoss = false
 _G.AutoHalloween = false
@@ -1754,7 +1767,7 @@ end
 
 local HalloweenBossOffsets = {
     ["Grim Reaper"] = { Distance = 1, Height = 50 },
-    ["Frankenbrute"] = { Distance = 1, Height = 96 },
+    ["Frankenbrute"] = { Distance = 1, Height = 100 }, -- ตั้งระยะ Y ใหม่ให้เป็น 100 ตามที่คุณขอ
     ["Pumpkin Titan"] = { Distance = 1, Height = 30 },
     ["Scarecrow Colossus"] = { Distance = 1, Height = 30 }
 }
@@ -1816,6 +1829,7 @@ task.spawn(function()
         task.wait(0.05)
     end
 end)
+
 
 -- ==========================================
 -- PETS (INVENTORY) TAB
@@ -1953,11 +1967,15 @@ tabs.inventory:AddButton("Add All Players", function()
 end)
 
 for _, player in ipairs(services.Players:GetPlayers()) do
-    if player ~= services.Players.LocalPlayer then tabs.inventory.TradePlayerDropdown:Add(player.DisplayName .. " | " .. player.Name) end
+    if player ~= services.Players.LocalPlayer then
+        tabs.inventory.TradePlayerDropdown:Add(player.DisplayName .. " | " .. player.Name)
+    end
 end
 
 services.Players.PlayerAdded:Connect(function(player)
-    if player ~= services.Players.LocalPlayer then tabs.inventory.TradePlayerDropdown:Add(player.DisplayName .. " | " .. player.Name) end
+    if player ~= services.Players.LocalPlayer then
+        tabs.inventory.TradePlayerDropdown:Add(player.DisplayName .. " | " .. player.Name)
+    end
 end)
 
 services.Players.PlayerRemoving:Connect(function(player)
@@ -2042,7 +2060,10 @@ task.spawn(function()
 end)
 tabs.boosts:AddSwitch("Eat All Eggs", function(state) tabs.boosts.EggEaterData.Running = state end):Set(false)
 
-tabs.boosts.BoostData = { ItemList = {"Tropical Shake", "Energy Shake", "Protein Bar", "TOUGH Bar", "Protein Shake", "ULTRA Shake", "Energy Bar"}, Running = false }
+tabs.boosts.BoostData = {
+	ItemList = {"Tropical Shake", "Energy Shake", "Protein Bar", "TOUGH Bar", "Protein Shake", "ULTRA Shake", "Energy Bar"},
+	Running = false
+}
 
 task.spawn(function()
 	while true do
@@ -2072,7 +2093,9 @@ tabs.boosts.EggPlayerDropdown = tabs.boosts:AddDropdown("Choose Player", functio
 end)
 
 for _, player in ipairs(services.Players:GetPlayers()) do
-    if player ~= services.Players.LocalPlayer then tabs.boosts.EggPlayerDropdown:Add(player.DisplayName .. " | " .. player.Name) end
+    if player ~= services.Players.LocalPlayer then
+        tabs.boosts.EggPlayerDropdown:Add(player.DisplayName .. " | " .. player.Name)
+    end
 end
 services.Players.PlayerAdded:Connect(function(player)
     if player ~= services.Players.LocalPlayer then tabs.boosts.EggPlayerDropdown:Add(player.DisplayName .. " | " .. player.Name) end
@@ -2167,6 +2190,7 @@ tabs.teleport.Locations = {
 	{name = "Main Island", pos = CFrame.new(16.07, 9.08, 133.8)},
 	{name = "Beach", pos = CFrame.new(-8, 9, -169.2)}
 }
+
 for _, loc in ipairs(tabs.teleport.Locations) do
 	tabs.teleport:AddButton(loc.name, function()
 		if utils.playerData.Player.Character and utils.playerData.Player.Character:FindFirstChild("HumanoidRootPart") then
@@ -2186,6 +2210,7 @@ tabs.teleport.GymLocations = {
 	{name = "Mythical Gym", pos = CFrame.new(2250, 7.37, 1073.2)},
 	{name = "Frost Gym", pos = CFrame.new(-2623, 7.36, -409)}
 }
+
 for _, gym in ipairs(tabs.teleport.GymLocations) do
 	tabs.teleport:AddButton(gym.name, function()
 		if utils.playerData.Player.Character and utils.playerData.Player.Character:FindFirstChild("HumanoidRootPart") then
@@ -2246,21 +2271,10 @@ end)
 -- INFO TAB
 -- ==========================================
 tabs.info:Show()
-tabs.info:AddLabel("Made by xyzhenrik")
-tabs.info:AddLabel("Any issues? Create a Ticket on Discord")
-tabs.info:AddLabel("Official Discord: discord.gg/9eFf93Kg8D")
-tabs.info:AddButton("Copy Invite", function()
-	if type(setclipboard) == "function" and pcall(setclipboard, "https://discord.gg/9eFf93Kg8D") then
-		pcall(function() game.StarterGui:SetCore("SendNotification", {Title = "Link Copied!", Text = "You can continue to Discord now.", Duration = 3}) end)
-	else
-		pcall(function() game.StarterGui:SetCore("SendNotification", {Title = "Error!", Text = "Clipboard not Supported.", Duration = 3}) end)
-	end
-end)
+tabs.info:AddLabel("Made by NamPing")
 tabs.info:AddLabel("")
 tabs.info:AddLabel("Contributors:")
-tabs.info:AddLabel("- Henrik @xyzhenrik")
-tabs.info:AddLabel("- Muki @mukimagdich")
-tabs.info:AddLabel("- HalisAnteo @xyzhalis")
+tabs.info:AddLabel("- NamPing")
 tabs.info:AddLabel("")
-tabs.info:AddLabel("Silence is Open-Source! (Rayfield Edition)")
+tabs.info:AddLabel("Free Farm is Open-Source! (Rayfield Edition)")
 tabs.info:AddLabel("Muscle Legends [V4.2.0]")
